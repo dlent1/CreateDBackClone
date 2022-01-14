@@ -11,13 +11,15 @@ namespace CreateDBackClone
         private int _points;
         private Point _sheetLocation;
 
-        public Cherry(Texture2D texture, Vector2 position, float layerDepth, int cellWidth, int cellHeight, Point sheetLocation)
+        public Cherry(Texture2D texture, Vector2 position, float layerDepth, int cellWidth, int cellHeight, Point sheetLocation, int totalRows, int totalColumns, int points)
         {
             _cellDimensions = new Point(cellWidth, cellHeight);
             _texture = texture;
             Position = position;
             LayerDepth = layerDepth;
             _sheetLocation = sheetLocation;
+            _totalRows = totalRows;
+            _totalColumns = totalColumns;
         }
 
         public void Render(SpriteBatch spriteBatch, float rotation, Vector2 scale, Vector2 pointRotatedAround)
