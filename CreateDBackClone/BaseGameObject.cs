@@ -6,9 +6,9 @@ namespace CreateDBackClone
 {
     public class BaseGameObject
     {
-        protected Vector2 Position { get; set; }
-        protected bool Visible { get; set; }
-        protected float LayerDepth { get; set; }
+        public Vector2 Position { get; set; }
+        public bool Visible { get; set; }
+        public float LayerDepth { get; set; }
         protected Texture2D _texture;
         protected Point _cellDimensions; // The width and height of the cell
 

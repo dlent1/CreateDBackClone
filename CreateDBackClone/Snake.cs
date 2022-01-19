@@ -41,15 +41,50 @@ namespace CreateDBackClone
 
                 // XBox Controller Left thumb stick
                 if (capabilities.HasLeftXThumbStick)
-                    position.X += state.ThumbSticks.Left.X * 10.0f;
+                    position.X += state.ThumbSticks.Left.X * 2.0f;
 
                 if (capabilities.HasLeftYThumbStick)
-                    position.Y -= state.ThumbSticks.Left.Y * 10.0f;
+                    position.Y -= state.ThumbSticks.Left.Y * 2.0f;
 
                 Position = position;
                 SnakeList.Insert(0, Position);  // Add a new head to the front of the list
                 SnakeList.RemoveAt(_snakeLength - 1);  // Remove the tail from the list
             }   
+        }
+
+        public bool CheckForCollisionWithOther(List<BaseGameObject> gameObjects)
+        {
+            if (RectangleToRectangleCollision(gameObjects))
+                return true;
+
+            else
+                return false;
+        }
+
+        public void CheckForCollisionWithSelf()
+        {
+
+        }
+
+        private bool RectangleToRectangleCollision(List<BaseGameObject> gameObjects)
+        {
+            Cherry cherry = null;
+
+            foreach (BaseGameObject gameObject in gameObjects)
+            {
+                if (!(gameObject is Snake))
+                {
+                    cherry = ((Cherry)gameObject);
+
+                    if (cherry.Position.X + cherry.CellDimensions.X >= SnakeList[0].X
+                        && cherry.Position.X <= SnakeList[0].X + _cellDimensions.X
+                        && cherry.Position.Y + cherry.CellDimensions.Y >= SnakeList[0].Y
+                        && cherry.Position.Y <= SnakeList[0].Y + _cellDimensions.Y)
+                        return true;
+                }
+            }
+
+            return false;
         }
 
         private void CreateSnake()

@@ -13,7 +13,7 @@ namespace CreateDBackClone
         private const int CHERRYPOINTS = 50;
         private const int SNAKEWIDTH = 2;
         private const int SNAKEHEIGHT = 2;
-        private const int SNAKELENGTH = 150;
+        private const int SNAKELENGTH = 200;
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
         private List<SoundEffect> _soundEffects;
@@ -43,14 +43,22 @@ namespace CreateDBackClone
             _soundEffects.Add(Content.Load<SoundEffect>("blip"));
             _soundEffects.Add(Content.Load<SoundEffect>("Blip2"));
 
-            _gameObjects.Add(new Cherry(Content.Load<Texture2D>("cherrySpriteSheet"), new Vector2(300, 300), 0.5f, CHERRYWIDTH, CHERRYHEIGHT, Point.Zero, 1, 2, CHERRYPOINTS));
             _gameObjects.Add(new Snake(new Texture2D(_graphics.GraphicsDevice, 1, 1, false, SurfaceFormat.Color), _snakeStartPosition, 0.5f, SNAKEWIDTH, SNAKEHEIGHT, SNAKELENGTH));
+            _gameObjects.Add(new Cherry(Content.Load<Texture2D>("cherrySpriteSheet"), new Vector2(300, 300), 0.5f, CHERRYWIDTH, CHERRYHEIGHT, Point.Zero, 1, 2, CHERRYPOINTS));
+
+            _soundEffects[0].Play();
+            
         }
 
         protected override void Update(GameTime gameTime)
         {
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
+
+            ((Snake)_gameObjects[0]).HandleGameInput();
+
+            if (((Snake)_gameObjects[0]).CheckForCollisionWithOther(_gameObjects))
+                _soundEffects[1].Play();
 
             // TODO: Add your update logic here
 
@@ -61,12 +69,12 @@ namespace CreateDBackClone
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
-            _spriteBatch.Begin();
+            _spriteBatch.Begin(SpriteSortMode.FrontToBack);
 
             foreach (BaseGameObject gameObject in _gameObjects)
             {
                 if (gameObject is Cherry)
-                    ((Cherry)gameObject).Render(_spriteBatch, 0.0f, Vector2.One, Vector2.Zero);
+                    ((Cherry)gameObject).Render(_spriteBatch, 0.0f, Vector2.Zero, Vector2.One);
 
                 if (gameObject is Snake)
                     ((Snake)gameObject).Render(_spriteBatch, 0.0f);
