@@ -11,15 +11,16 @@ namespace CreateDBackClone
         public List<Vector2> SnakeList { get; set; } // Element 0 will always be the head
         private int _snakeLength; // The number of segments in the snake
 
-        public Snake(Texture2D texture, Vector2 position, float layerDepth, int cellWidth, int cellHeight, int snakeLength)
+        public Snake(Texture2D texture, Vector2 position, float layerDepth, int cellWidth, int cellHeight, int snakeLength, int id)
         {
-            _texture = texture;
-            _texture.SetData(new[] { Color.White });
+            Texture = texture;
+            Texture.SetData(new[] { Color.White });
             Position = position;  // In this class Position will represent the position of the head
             LayerDepth = layerDepth;
-            _cellDimensions = new Point(cellWidth, cellHeight);  // These dimensions are the dimensions for each individual segment of the snake
+            CellDimensions = new Point(cellWidth, cellHeight);  // These dimensions are the dimensions for each individual segment of the snake
             _snakeLength = snakeLength;
             SnakeList = new List<Vector2>();
+            ID = id;
 
             CreateSnake();
         }
@@ -47,40 +48,79 @@ namespace CreateDBackClone
                     position.Y -= state.ThumbSticks.Left.Y * 2.0f;
 
                 Position = position;
-                SnakeList.Insert(0, Position);  // Add a new head to the front of the list
                 SnakeList.RemoveAt(_snakeLength - 1);  // Remove the tail from the list
+                SnakeList.Insert(0, Position);  // Add a new head to the front of the list
             }   
         }
 
         public bool CheckForCollisionWithOther(List<BaseGameObject> gameObjects)
         {
-            if (RectangleToRectangleCollision(gameObjects))
-                return true;
-
-            else
+            foreach (BaseGameObject gameObject in gameObjects)
+            {
+                if (gameObject is Cherry)
+                {
+                    if (RectangleToRectangleCollision(gameObject))
+                    {
+                        if (PerPixelCollision(gameObject))
+                            return true;
+                    }
+                }
+            }
                 return false;
         }
 
-        public void CheckForCollisionWithSelf()
+        public bool CheckForCollisionWithSelf()
         {
+            for (int i = _snakeLength / 2; i < _snakeLength; i++)
+            {
+                BaseGameObject sprite = new BaseGameObject();
+                sprite.CellDimensions = CellDimensions;
+                sprite.Position = SnakeList[i];
 
+                if (RectangleToRectangleCollision(sprite))
+                    return true;
+            }
+            
+            return false;
         }
 
-        private bool RectangleToRectangleCollision(List<BaseGameObject> gameObjects)
+        private bool RectangleToRectangleCollision(BaseGameObject sprite)
         {
-            Cherry cherry = null;
+            if (sprite.Position.X + sprite.CellDimensions.X >= SnakeList[0].X
+                && sprite.Position.X <= SnakeList[0].X + CellDimensions.X
+                && sprite.Position.Y + sprite.CellDimensions.Y >= SnakeList[0].Y
+                && sprite.Position.Y <= SnakeList[0].Y + CellDimensions.Y)
+                return true;
 
-            foreach (BaseGameObject gameObject in gameObjects)
+            return false;
+        }
+
+        private bool PerPixelCollision(BaseGameObject sprite)
+        {
+            // Get Color data of each Texture
+            // All snake pixels are black, so we don't need to create a color array for it.
+            Color[] cherryColors = new Color[sprite.CellDimensions.X * sprite.CellDimensions.Y];
+            sprite.Texture.GetData(0, new Rectangle(0, 0, sprite.CellDimensions.X, sprite.CellDimensions.Y), cherryColors, 0, sprite.CellDimensions.X * sprite.CellDimensions.Y);
+
+            // Calculate the intersecting rectangle
+            int x1 = (int)(Math.Max(Position.X, sprite.Position.X));
+            int x2 = (int)(Math.Min(Position.X + CellDimensions.X, sprite.Position.X + sprite.CellDimensions.X));
+
+            int y1 = (int)(Math.Max(Position.Y, sprite.Position.Y));
+            int y2 = (int)(Math.Min(Position.Y + CellDimensions.Y, sprite.Position.Y + sprite.CellDimensions.Y));
+
+            // For each single pixel in the intersecting rectangle
+            for (int y = y1; y < y2; ++y)
             {
-                if (!(gameObject is Snake))
+                for (int x = x1; x < x2; ++x)
                 {
-                    cherry = ((Cherry)gameObject);
+                    // Get the color from the texture
+                    Color colorB = cherryColors[(x - (int)sprite.Position.X) + (y - (int)sprite.Position.Y) * sprite.CellDimensions.X];
 
-                    if (cherry.Position.X + cherry.CellDimensions.X >= SnakeList[0].X
-                        && cherry.Position.X <= SnakeList[0].X + _cellDimensions.X
-                        && cherry.Position.Y + cherry.CellDimensions.Y >= SnakeList[0].Y
-                        && cherry.Position.Y <= SnakeList[0].Y + _cellDimensions.Y)
+                    if (colorB.A != 0) // If the intersected pixel in the cherry is not transparent
+                    {
                         return true;
+                    }
                 }
             }
 
@@ -90,12 +130,7 @@ namespace CreateDBackClone
         private void CreateSnake()
         {
             for (int i = 0; i < _snakeLength; i++)
-            {
-                if (i == 0)
-                    SnakeList.Add(new Vector2(Position.X, Position.Y));
-                else
-                    SnakeList.Add(new Vector2(Position.X, Position.Y + (i * _cellDimensions.X)));
-            }
+                SnakeList.Add(new Vector2(Position.X, Position.Y));
         }
     }
 }

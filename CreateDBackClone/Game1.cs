@@ -13,12 +13,13 @@ namespace CreateDBackClone
         private const int CHERRYPOINTS = 50;
         private const int SNAKEWIDTH = 2;
         private const int SNAKEHEIGHT = 2;
-        private const int SNAKELENGTH = 200;
+        private const int SNAKELENGTH = 250;
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
         private List<SoundEffect> _soundEffects;
         private List<BaseGameObject> _gameObjects;
         private Vector2 _snakeStartPosition;
+        private int _nextID;
         
         public Game1()
         {
@@ -32,6 +33,7 @@ namespace CreateDBackClone
             _soundEffects = new List<SoundEffect>();
             _gameObjects = new List<BaseGameObject>();
             _snakeStartPosition = new Vector2(600, 150);
+            _nextID = 0;
 
             base.Initialize();
         }
@@ -43,8 +45,10 @@ namespace CreateDBackClone
             _soundEffects.Add(Content.Load<SoundEffect>("blip"));
             _soundEffects.Add(Content.Load<SoundEffect>("Blip2"));
 
-            _gameObjects.Add(new Snake(new Texture2D(_graphics.GraphicsDevice, 1, 1, false, SurfaceFormat.Color), _snakeStartPosition, 0.5f, SNAKEWIDTH, SNAKEHEIGHT, SNAKELENGTH));
-            _gameObjects.Add(new Cherry(Content.Load<Texture2D>("cherrySpriteSheet"), new Vector2(300, 300), 0.5f, CHERRYWIDTH, CHERRYHEIGHT, Point.Zero, 1, 2, CHERRYPOINTS));
+            _gameObjects.Add(new Snake(new Texture2D(_graphics.GraphicsDevice, 1, 1, false, SurfaceFormat.Color), _snakeStartPosition, 0.5f, SNAKEWIDTH, SNAKEHEIGHT, SNAKELENGTH, 0));
+            _gameObjects.Add(new Cherry(Content.Load<Texture2D>("cherrySpriteSheet"), new Vector2(300, 300), 0.5f, CHERRYWIDTH, CHERRYHEIGHT, Point.Zero, 1, 2, CHERRYPOINTS, 1));
+
+            _nextID = 2;
 
             _soundEffects[0].Play();
             
@@ -52,13 +56,24 @@ namespace CreateDBackClone
 
         protected override void Update(GameTime gameTime)
         {
+            Snake snake = ((Snake)_gameObjects[0]);
+
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
-            ((Snake)_gameObjects[0]).HandleGameInput();
+            snake.HandleGameInput();
 
-            if (((Snake)_gameObjects[0]).CheckForCollisionWithOther(_gameObjects))
+            if (snake.CheckForCollisionWithOther(_gameObjects))
                 _soundEffects[1].Play();
+
+            if (snake.CheckForCollisionWithSelf())
+            {
+                foreach (BaseGameObject gameObject in _gameObjects)
+                {
+                    if (gameObject is Cherry && gameObject.Alive)
+                        ((Cherry)gameObject).CheckIfLooped(snake.SnakeList);
+                }
+            }    
 
             // TODO: Add your update logic here
 
