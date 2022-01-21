@@ -13,23 +13,30 @@ namespace CreateDBackClone
         private const int CHERRYPOINTS = 50;
         private const int SNAKEWIDTH = 2;
         private const int SNAKEHEIGHT = 2;
-        private const int SNAKELENGTH = 250;
+        private const int SNAKELENGTH = 300;
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
         private List<SoundEffect> _soundEffects;
         private List<BaseGameObject> _gameObjects;
         private Vector2 _snakeStartPosition;
         private int _nextID;
+        private int _screenWidth;
+        private int _screenHeight;
         
-        public Game1()
+        public Game1(int screenWidth, int screenHeight)
         {
             _graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
             IsMouseVisible = true;
+            _screenWidth = screenWidth;
+            _screenHeight = screenHeight;
         }
 
         protected override void Initialize()
         {
+            _graphics.PreferredBackBufferWidth = _screenWidth;
+            _graphics.PreferredBackBufferHeight = _screenHeight;
+            _graphics.ApplyChanges();
             _soundEffects = new List<SoundEffect>();
             _gameObjects = new List<BaseGameObject>();
             _snakeStartPosition = new Vector2(600, 150);
@@ -71,11 +78,19 @@ namespace CreateDBackClone
                 foreach (BaseGameObject gameObject in _gameObjects)
                 {
                     if (gameObject is Cherry && gameObject.Alive)
-                        ((Cherry)gameObject).CheckIfLooped(snake.SnakeList);
+                    {
+                        if (((Cherry)gameObject).CheckIfLooped(snake.SnakeList, _screenWidth, _screenHeight))
+                            _soundEffects[1].Play();
+                    }      
                 }
             }    
 
-            // TODO: Add your update logic here
+            // Update cherries
+            foreach (BaseGameObject gameObject in _gameObjects)
+            {
+                if (gameObject is Cherry)
+                    ((Cherry)gameObject).Update();
+            }
 
             base.Update(gameTime);
         }

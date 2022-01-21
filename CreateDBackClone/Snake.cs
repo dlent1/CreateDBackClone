@@ -42,10 +42,10 @@ namespace CreateDBackClone
 
                 // XBox Controller Left thumb stick
                 if (capabilities.HasLeftXThumbStick)
-                    position.X += state.ThumbSticks.Left.X * 2.0f;
+                    position.X += (int)(state.ThumbSticks.Left.X * 2.0f);
 
                 if (capabilities.HasLeftYThumbStick)
-                    position.Y -= state.ThumbSticks.Left.Y * 2.0f;
+                    position.Y -= (int)(state.ThumbSticks.Left.Y * 2.0f);
 
                 Position = position;
                 SnakeList.RemoveAt(_snakeLength - 1);  // Remove the tail from the list
@@ -59,14 +59,18 @@ namespace CreateDBackClone
             {
                 if (gameObject is Cherry)
                 {
-                    if (RectangleToRectangleCollision(gameObject))
+                    if (((Cherry)gameObject).Alive)
                     {
-                        if (PerPixelCollision(gameObject))
-                            return true;
-                    }
+                        if (RectangleToRectangleCollision(gameObject))
+                        {
+                            if (PerPixelCollision(gameObject))
+                                return true;
+                        }
+                    } 
                 }
             }
-                return false;
+
+            return false;
         }
 
         public bool CheckForCollisionWithSelf()

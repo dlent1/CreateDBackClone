@@ -42,15 +42,12 @@ namespace CreateDBackClone
         // This is used with sprite sheets
         public virtual void Render(SpriteBatch spriteBatch, Point sheetLocation, Vector2 position, float rotation, Vector2 scale, Vector2 pointRotatedAround, float layerDepth)
         {
-            Rectangle counterRectangle;
+            if (Visible)
+            {
+                Rectangle counterRectangle = new Rectangle(sheetLocation.X, sheetLocation.Y, CellDimensions.X, CellDimensions.Y);
 
-            if (sheetLocation.X == 0)
-                counterRectangle = new Rectangle(sheetLocation.X, sheetLocation.Y, CellDimensions.X, CellDimensions.Y);
-
-            else
-                counterRectangle = new Rectangle(sheetLocation.X * CellDimensions.X, sheetLocation.Y, CellDimensions.X, CellDimensions.Y);
-
-            spriteBatch.Draw(Texture, position, counterRectangle, Color.White, rotation, pointRotatedAround, scale, SpriteEffects.None, layerDepth);
-        }
+                spriteBatch.Draw(Texture, position, counterRectangle, Color.White, rotation, pointRotatedAround, scale, SpriteEffects.None, layerDepth);
+            }
+        }    
     }
 }
