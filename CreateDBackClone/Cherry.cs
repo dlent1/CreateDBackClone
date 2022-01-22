@@ -9,9 +9,10 @@ namespace CreateDBackClone
     {
         private int _totalRows;
         private int _totalColumns;
-        private int _points;
         private Point _sheetLocation;
         private int _timeLeft; // The amount of time to display the point value after the cherry is killed
+
+        public int Points { get; set; }
 
         public Cherry(Texture2D texture, Vector2 position, float layerDepth, int cellWidth, int cellHeight, Point sheetLocation, int totalRows, int totalColumns, int points, int id)
         {
@@ -24,6 +25,7 @@ namespace CreateDBackClone
             _totalColumns = totalColumns;
             ID = id;
             _timeLeft = 60;
+            Points = points;
         }
 
         public void Update()
